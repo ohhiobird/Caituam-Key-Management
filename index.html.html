@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Key Management Caituam</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4CAF50, #2196F3);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      color: white;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 60%;
+      margin-top: 20px;
+      background-color: white;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      color: black;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    input[type="text"], input[type="number"], select {
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Key Management Caituam</h1>
+
+  <div>
+    <label for="keyName">Name:</label>
+    <input type="text" id="keyName" placeholder="Enter your name">
+
+    <label for="level">Select Level:</label>
+    <select id="level">
+      <option value="01">Spectator (SP)</option>
+      <option value="02">Entry (EN)</option>
+      <option value="03">Silver Star (SS)</option>
+      <option value="04">Premium (PR)</option>
+      <option value="05">Executive (EX)</option>
+      <option value="06">Nova Flow (NF)</option>
+      <option value="07">Supreme (SU)</option>
+    </select>
+
+    <button onclick="generateAndStoreKey()">Generate Key</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>Name</th>
+        <th>Level</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="keyTableBody">
+      <!-- Table content will go here -->
+    </tbody>
+  </table>
+
+  <script>
+    function generateAndStoreKey() {
+      const keyDetails = getKeyDetailsFromLocalStorage();
+      
+      // Generate a random 6-digit key
+      const level = document.getElementById("level").value;
+      const levelPrefix = levelMappings[level].substring(0, 2).toUpperCase();
+      const key = levelPrefix + Math.floor(Math.random() * (1e4 - 1e3) + 1e3).toString();
+
+      // Get user-entered name
+      const name = document.getElementById("keyName").value;
+
+      // Add the new key to the array
+      keyDetails.push({ key, name, level });
+
+      // Save the updated keys back to localStorage
+      localStorage.setItem("keys", JSON.stringify(keyDetails));
+
+      // Update the table on the webpage
+      updateKeyTable();
+    }
+
+    function deleteKey(index) {
+      const keyDetails = getKeyDetailsFromLocalStorage();
+
+      // Mark the key as deleted
+      keyDetails[index].deleted = true;
+
+      // Save the updated keys back to localStorage
+      localStorage.setItem("keys", JSON.stringify(keyDetails));
+
+      // Update the table on the webpage
+      updateKeyTable();
+    }
+
+    function getKeyDetailsFromLocalStorage() {
+      // Get existing keys from localStorage
+      return JSON.parse(localStorage.getItem("keys")) || [];
+    }
+
+    function updateKeyTable() {
+      const keyTableBody = document.getElementById("keyTableBody");
+      keyTableBody.innerHTML = "";
+
+      // Get keys from localStorage
+      const keyDetails = getKeyDetailsFromLocalStorage();
+
+      // Populate the table
+      keyDetails.forEach((keyInfo, index) => {
+        if (!keyInfo.deleted) {
+          const row = keyTableBody.insertRow();
+          row.insertCell().textContent = keyInfo.key;
+          row.insertCell().textContent = keyInfo.name;
+          row.insertCell().textContent = levelMappings[keyInfo.level];
+
+          // Create a delete button
+          const deleteCell = row.insertCell();
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "Delete";
+          deleteButton.onclick = function() {
+            deleteKey(index);
+          };
+          deleteCell.appendChild(deleteButton);
+        }
+      });
+    }
+
+    // Set levels and key prefixes
+    const levelMappings = {
+      "01": "Spectator (SP)",
+      "02": "Entry (EN)",
+      "03": "Silver Star (SS)",
+      "04": "Premium (PR)",
+      "05": "Executive (EX)",
+      "06": "Nova Flow (NF)",
+      "07": "Supreme (SU)"
+    };
+
+    // Load the initial state of the table
+    updateKeyTable();
+  </script>
+
+</body>
+</html>
